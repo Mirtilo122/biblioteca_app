@@ -1,0 +1,45 @@
+1. Modelagem
+
+-Criar o modelo entidade-relacionamento (MER).
+-Gerar o modelo lógico relacional.
+-Diagramas devem ser entregues junto com o projeto.
+
+OK 2. Banco de Dados
+
+--- Criação de todas as tabelas
+
+--- Inserção de dados de exemplo em todas as tabelas
+
+Ok 3. CRUD via SQL
+
+--- Comandos SQL para inserir, atualizar, excluir e consultar registros de: Livros, Usuários, Funcionários, Empréstimos
+
+OK 4. Views
+
+--- Criar pelo menos 3 views, incluindo:
+
+	Livros disponíveis para empréstimo
+	Histórico de empréstimos por usuário
+	Empréstimos vencidos (data de devolução menor que a atual e status "pendente")
+
+OK 5. Stored Procedures
+
+- Criar pelo menos 2 procedures, como por exemplo:
+
+	RegistrarEmprestimo(IDLivro, IDUsuario)
+	RegistrarDevolucao(IDLivro, IDUsuario)
+
+6. Interface de Consulta
+
+- Pode ser feita por meio de um script SQL com menus simples utilizando interface gráfica simples (opcional).
+- A interface deve permitir a navegação e execução dos principais comandos CRUD.
+
+7. Entrega
+Script SQL completo com criação das tabelas, inserções, views, procedures e testes.
+
+- Arquivo .pdf com:
+
+	Diagrama MER e lógico.
+	Explicação das procedures e views criadas.
+	Relato do desenvolvimento (mínimo 1 página).
+	Interface desenvolvida (mesmo que simples).
