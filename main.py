@@ -2,7 +2,7 @@ from db import execute_script
 from interface import menu_principal
 
 def setup_database():
-    print("Inicioando configuração dos scripts do banco de dados...")
+    print("Iniciando configuração dos scripts do banco de dados...")
     scripts = [
         'sql_scripts/tables.sql',
         'sql_scripts/views.sql',
@@ -13,6 +13,7 @@ def setup_database():
         print("Configurando " + script)
         try:
             execute_script(script)
+            print("Configuração de "+ script + " concluído!")
         except Exception as e:
             print(f"Falha na execução do script {script}: {e}")
             break

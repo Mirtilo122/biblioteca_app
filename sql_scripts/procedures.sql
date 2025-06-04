@@ -6,7 +6,7 @@ DELIMITER //
 CREATE PROCEDURE RegistrarEmprestimo(
     IN p_IDLivro INT, 
     IN p_IDUsuario INT, 
-    IN p_IDFuncionario INT, 
+    IN p_IDFuncionario INT,
     IN p_DataDevolucao DATE, 
     IN p_DataEmprestimo DATE
 )

@@ -5,6 +5,7 @@ CREATE TABLE Livros (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     Titulo VARCHAR(255) NOT NULL,
     Autor VARCHAR(255),
+    ImagemURL VARCHAR(255),
     Editora VARCHAR(255),
     Genero VARCHAR(100),
     Ano INT,

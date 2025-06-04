@@ -31,7 +31,7 @@ OK 5. Stored Procedures
 
 6. Interface de Consulta
 
-- Pode ser feita por meio de um script SQL com menus simples utilizando interface gráfica simples (opcional).
+- Pode ser feita por meio de um script SQL com menus simples utilizando interface gráfica simples.
 - A interface deve permitir a navegação e execução dos principais comandos CRUD.
 
 7. Entrega

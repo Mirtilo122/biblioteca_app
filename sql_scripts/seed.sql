@@ -1,9 +1,9 @@
 USE bibliotecadb;
 
-INSERT INTO Livros (Titulo, Autor, Editora, Genero, Ano, ISBN, QuantidadeDisponivel)
+INSERT INTO Livros (Titulo, Autor, Editora, Genero, Ano, ISBN, QuantidadeDisponivel, ImagemURL)
 VALUES 
-('Dom Casmurro', 'Machado de Assis', 'Editora A', 'Romance', 1899, '1234567890123', 1),
-('O Hobbit', 'J.R.R. Tolkien', 'Editora B', 'Fantasia', 1937, '9876543210987', 2);
+('Dom Casmurro', 'Machado de Assis', 'Editora A', 'Romance', 1899, '1234567890123', 1, 'imgs\domcasmurro.jpg'),
+('O Hobbit', 'J.R.R. Tolkien', 'Editora B', 'Fantasia', 1937, '9876543210987', 2, 'imgs\hobbit.jpg');
 
 INSERT INTO Usuarios (Nome, Email, CPF, Telefone)
 VALUES 
@@ -16,6 +16,6 @@ VALUES
 ('Ana Costa', 'Atendente', 'ana', 'abcd');
 
 CALL RegistrarEmprestimo(2, 2, 2, '2025-05-10', '2025-05-01');
-CALL RegistrarDevolucao(1);
-CALL RegistrarEmprestimo(1, 2, 2, '2025-05-30', '2025-05-21');
+CALL RegistrarEmprestimo(1, 1, 2, '2025-05-30', '2025-05-21');
+CALL RegistrarDevolucao(2);
 CALL RegistrarEmprestimo(1, 2, 2, '2025-05-30', NULL);
