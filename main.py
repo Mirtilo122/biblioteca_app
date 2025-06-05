@@ -13,10 +13,9 @@ def setup_database():
         print("Configurando " + script)
         try:
             execute_script(script)
-            print("Configuração de "+ script + " concluído!")
+            print("Configuração de "+ script + " concluída!")
         except Exception as e:
             print(f"Falha na execução do script {script}: {e}")
-            break
 
 if __name__ == '__main__':
     print("Configurando banco de dados...")
