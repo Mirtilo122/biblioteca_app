@@ -1,5 +1,6 @@
 from db import execute_script
-from interface import menu_principal
+""" from interface import menu_principal """
+from pages.menu_page import menu_principal
 
 def setup_database():
     print("Iniciando configuração dos scripts do banco de dados...")
