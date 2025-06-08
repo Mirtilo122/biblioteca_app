@@ -17,3 +17,4 @@ def menu_principal():
               command=lambda: emprestimos_page(root)).pack(pady=10)
     # mantenha seus botões de registrar empréstimo e devolução aqui
     root.mainloop()
+ 
