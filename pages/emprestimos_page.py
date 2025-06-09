@@ -5,7 +5,7 @@ from crud import (
     deletar_emprestimo, listar_livros_disponiveis, listar_historico_emprestimos,
     listar_emprestimos_vencidos
 )
-from datetime import datetime
+from datetime import datetime, date  # Added 'date' to the import
 
 # Estilos
 FONTE = ("Segoe UI", 10)
@@ -84,12 +84,21 @@ def emprestimos_page(root):
                       command=lambda reg=e: ver_emprestimo(reg)).pack(side="left", padx=5)
             tk.Button(botoes, text="Editar", bg=COR_EDIT, fg="white", font=FONTE, relief="flat",
                       command=lambda reg=e: mostrar_formulario_emprestimo(root, container, reg)).pack(side="left", padx=5)
+            tk.Button(botoes, text="Excluir", bg="#b00020", fg="white", font=FONTE, relief="flat",
+                      command=lambda reg=e: confirmar_exclusao(reg)).pack(side="left", padx=5)
 
-    render_emprestimos()
+    def confirmar_exclusao(e):
+        if messagebox.askyesno("Confirmação", "Deseja excluir este empréstimo?"):
+            deletar_emprestimo(e["ID"])
+            messagebox.showinfo("Removido", "Empréstimo excluído.")
+            render_emprestimos()
+
+    render_emprestimos()  # Ensure the loan list is rendered
 
 def ver_emprestimo(e):
     info = "\n".join([f"{k}: {v}" for k, v in e.items()])
     messagebox.showinfo("Detalhes do Empréstimo", info)
+
 def mostrar_formulario_emprestimo(root, container, emprestimo=None):
     for w in root.winfo_children():
         w.destroy()
@@ -108,12 +117,15 @@ def mostrar_formulario_emprestimo(root, container, emprestimo=None):
         e = tk.Entry(form, font=FONTE)
         if emprestimo:
             value = emprestimo[c]
-            if c in ['DataEmprestimo', 'DataDevolucao'] and value:
-                try:
-                    date_obj = datetime.strptime(value, "%d/%m/%Y")
-                    value = date_obj.strftime("%Y-%m-%d")
-                except ValueError:
-                    pass  # Keep original value if format is invalid
+            if c in ['DataEmprestimo', 'DataDevolucao']:
+                if isinstance(value, date):  # Changed to date
+                    value = value.strftime("%Y-%m-%d")
+                elif value:  # If it's a string, try to parse it
+                    try:
+                        date_obj = datetime.strptime(value, "%d/%m/%Y")
+                        value = date_obj.strftime("%Y-%m-%d")
+                    except ValueError:
+                        pass  # Keep original value if format is invalid
             e.insert(0, value)
         e.pack(fill="x")
         entradas[c] = e
@@ -156,7 +168,7 @@ def mostrar_formulario_emprestimo(root, container, emprestimo=None):
                 emprestimos_page(root)
 
         tk.Button(form, text="Excluir", bg="#b00020", fg="white", font=FONTE,
-                  relief="flat", command=excluir).pack()
+                  relief="flat", command=excluir).pack(pady=5)
 
     tk.Button(form, text="← Voltar", command=voltar, bg=COR_BOTAO,
               fg="white", relief="flat").pack(pady=5)
