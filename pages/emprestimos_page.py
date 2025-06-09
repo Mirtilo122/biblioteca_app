@@ -5,89 +5,158 @@ from crud import (
     deletar_emprestimo, listar_livros_disponiveis, listar_historico_emprestimos,
     listar_emprestimos_vencidos
 )
+from datetime import datetime
+
+# Estilos
+FONTE = ("Segoe UI", 10)
+COR_BG = "#f5f7fa"
+COR_FG = "#333333"
+COR_HEADER = "#2c3e50"
+COR_BOTAO = "#3498db"
+COR_VIEW = "#1abc9c"
+COR_EDIT = "#f39c12"
+COR_CARD = "#ffffff"
+COR_META = "#7f8c8d"
 
 def emprestimos_page(root):
-    janela = tk.Toplevel(root)
-    janela.title("Lista de Empréstimos")
-    frame = tk.Frame(janela); frame.pack(padx=10, pady=10)
+    root.title("Empréstimos")
+    for w in root.winfo_children():
+        w.destroy()
+
+    container = tk.Frame(root, bg=COR_BG)
+    container.pack(fill="both", expand=True, padx=20, pady=20)
+
+    tk.Label(container, text="Gerenciar Empréstimos", font=("Segoe UI", 20, "bold"),
+             bg=COR_BG, fg=COR_HEADER).pack(pady=(0, 20))
+
+    # Botões topo
+    topo = tk.Frame(container, bg=COR_BG)
+    topo.pack(fill="x", pady=(0, 20))
+
+    def voltar_inicio():
+        from pages.menu_page import menu_principal
+        menu_principal(root)
+
+    tk.Button(topo, text="← Voltar ao Início", font=FONTE,
+              bg=COR_BOTAO, fg="white", relief="flat", padx=10, pady=5,
+              command=voltar_inicio).pack(side="left")
+
+    tk.Button(topo, text="+ Novo Empréstimo", font=FONTE,
+              bg=COR_BOTAO, fg="white", relief="flat", padx=15, pady=8,
+              command=lambda: mostrar_formulario_emprestimo(root, container)).pack(side="right")
+
+    # Scroll
+    canvas = tk.Canvas(container, bg=COR_BG, highlightthickness=0)
+    scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    scroll_frame = tk.Frame(canvas, bg=COR_BG)
+
+    scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    def render_emprestimos():
+        for w in scroll_frame.winfo_children():
+            w.destroy()
+
+        for e in listar_emprestimos():
+            card = tk.Frame(scroll_frame, bg=COR_CARD, bd=1, relief="groove", padx=20, pady=15)
+            card.pack(pady=10, fill="x")
+
+            info_frame = tk.Frame(card, bg=COR_CARD)
+            info_frame.pack(side="left", fill="x", expand=True)
+
+            titulo = f"Empréstimo ID: {e['ID']}"
+            tk.Label(info_frame, text=titulo, font=("Segoe UI", 14, "bold"),
+                     fg=COR_HEADER, bg=COR_CARD).pack(anchor="w")
+
+            meta = f"Livro: {e['IDLivro']} | Usuário: {e['IDUsuario']} | Funcionário: {e['IDFuncionario']}"
+            status = f"Data Empréstimo: {e['DataEmprestimo']} | Devolução: {e['DataDevolucao']} | Status: {e['Status']}"
+            tk.Label(info_frame, text=meta, font=FONTE, fg=COR_META, bg=COR_CARD).pack(anchor="w", pady=(5, 0))
+            tk.Label(info_frame, text=status, font=FONTE, fg=COR_META, bg=COR_CARD).pack(anchor="w", pady=(2, 0))
+
+            botoes = tk.Frame(card, bg=COR_CARD)
+            botoes.pack(side="right")
+
+            tk.Button(botoes, text="Ver", bg=COR_VIEW, fg="white", font=FONTE, relief="flat",
+                      command=lambda reg=e: ver_emprestimo(reg)).pack(side="left", padx=5)
+            tk.Button(botoes, text="Editar", bg=COR_EDIT, fg="white", font=FONTE, relief="flat",
+                      command=lambda reg=e: mostrar_formulario_emprestimo(root, container, reg)).pack(side="left", padx=5)
+
+    render_emprestimos()
+
+def ver_emprestimo(e):
+    info = "\n".join([f"{k}: {v}" for k, v in e.items()])
+    messagebox.showinfo("Detalhes do Empréstimo", info)
+def mostrar_formulario_emprestimo(root, container, emprestimo=None):
+    for w in root.winfo_children():
+        w.destroy()
+
+    form = tk.Frame(root, bg=COR_BG)
+    form.pack(fill="both", expand=True, padx=20, pady=20)
+
+    tk.Label(form, text="Editar Empréstimo" if emprestimo else "Novo Empréstimo",
+             font=("Segoe UI", 16, "bold"), bg=COR_BG, fg=COR_HEADER).pack(pady=10)
+
     campos = ['IDLivro', 'IDUsuario', 'IDFuncionario', 'DataEmprestimo', 'DataDevolucao', 'Status']
+    entradas = {}
 
-    def carregar():
-        for w in frame.winfo_children(): w.destroy()
-        for reg in listar_emprestimos():
-            info = " - ".join(f"{k}: {reg[k]}" for k in reg)
-            tk.Label(frame, text=info).pack(anchor='w')
-            tk.Button(frame, text="Ver", command=lambda r=reg: ver(r['ID'])).pack(anchor='w')
-            tk.Button(frame, text="Editar", command=lambda r=reg: editar(r['ID'])).pack(anchor='w')
-            tk.Label(frame, text="—"*50).pack()
+    for c in campos:
+        tk.Label(form, text=c, bg=COR_BG, fg=COR_FG, font=FONTE).pack(anchor="w", pady=(10, 0))
+        e = tk.Entry(form, font=FONTE)
+        if emprestimo:
+            value = emprestimo[c]
+            if c in ['DataEmprestimo', 'DataDevolucao'] and value:
+                try:
+                    date_obj = datetime.strptime(value, "%d/%m/%Y")
+                    value = date_obj.strftime("%Y-%m-%d")
+                except ValueError:
+                    pass  # Keep original value if format is invalid
+            e.insert(0, value)
+        e.pack(fill="x")
+        entradas[c] = e
 
-    def adicionar():
-        janela_add = tk.Toplevel(janela); janela_add.title("Adicionar Empréstimo")
-        entradas = {}
-        for c in campos:
-            tk.Label(janela_add, text=c).pack()
-            e = tk.Entry(janela_add); e.pack(); entradas[c] = e
+    def salvar():
+        try:
+            dados = [entradas[c].get().strip() for c in campos]
 
-        def salvar():
-            try:
-                dados = [entradas[c].get() for c in campos]
+            for campo in ['DataEmprestimo', 'DataDevolucao']:
+                valor = entradas[campo].get().strip()
+                if valor:
+                    try:
+                        datetime.strptime(valor, "%Y-%m-%d")
+                    except ValueError:
+                        messagebox.showerror("Erro", f"O campo '{campo}' deve estar no formato YYYY-MM-DD.")
+                        return
+
+            if emprestimo:
+                atualizar_emprestimo(emprestimo["ID"], *dados)
+            else:
                 inserir_emprestimo(*dados)
-                messagebox.showinfo("Sucesso","Empréstimo adicionado!")
-                janela_add.destroy(); carregar()
-            except Exception as e:
-                messagebox.showerror("Erro", str(e))
 
-        tk.Button(janela_add, text="Salvar", command=salvar).pack()
+            messagebox.showinfo("Sucesso", "Dados salvos com sucesso.")
+            emprestimos_page(root)
 
-    def ver(id_e):
-        reg = obter_emprestimo(id_e)
-        if not reg:
-            messagebox.showerror("Erro","Empréstimo não encontrado!"); return
-        janela_v = tk.Toplevel(janela); janela_v.title("Ver Empréstimo")
-        for k,v in reg.items():
-            tk.Label(janela_v, text=f"{k}: {v}").pack()
+        except Exception as e:
+            messagebox.showerror("Erro ao salvar", str(e))
 
-    def editar(id_e):
-        reg = obter_emprestimo(id_e)
-        if not reg:
-            messagebox.showerror("Erro","Empréstimo não encontrado!"); return
-        janela_e = tk.Toplevel(janela); janela_e.title("Editar Empréstimo")
-        entradas = {}
-        for c in campos:
-            tk.Label(janela_e, text=c).pack()
-            e = tk.Entry(janela_e); e.insert(0, reg[c]); e.pack(); entradas[c] = e
+    def voltar():
+        emprestimos_page(root)
 
-        def salvar():
-            try:
-                dados = [entradas[c].get() for c in campos]
-                atualizar_emprestimo(id_e, *dados)
-                messagebox.showinfo("Sucesso","Empréstimo atualizado!")
-                janela_e.destroy(); carregar()
-            except Exception as e:
-                messagebox.showerror("Erro", str(e))
+    tk.Button(form, text="Salvar", bg=COR_VIEW, fg="white", font=FONTE,
+              relief="flat", command=salvar).pack(pady=10)
 
+    if emprestimo:
         def excluir():
-            if messagebox.askyesno("Confirmar", "Excluir este empréstimo?"):
-                deletar_emprestimo(id_e)
-                messagebox.showinfo("Sucesso","Empréstimo excluído!")
-                janela_e.destroy(); carregar()
+            if messagebox.askyesno("Confirmação", "Deseja excluir este empréstimo?"):
+                deletar_emprestimo(emprestimo["ID"])
+                messagebox.showinfo("Removido", "Empréstimo excluído.")
+                emprestimos_page(root)
 
-        tk.Button(janela_e, text="Salvar", command=salvar).pack(pady=5)
-        tk.Button(janela_e, text="Excluir", fg="red", command=excluir).pack(pady=5)
+        tk.Button(form, text="Excluir", bg="#b00020", fg="white", font=FONTE,
+                  relief="flat", command=excluir).pack()
 
-    # Botões de visualização extra
-    tk.Button(janela, text="Livros Disponíveis", width=20,
-              command=lambda: view(listar_livros_disponiveis, "Livros Disponíveis")).pack(pady=5)
-    tk.Button(janela, text="Histórico de Empréstimos", width=20,
-              command=lambda: view(listar_historico_emprestimos, "Histórico de Empréstimos")).pack(pady=5)
-    tk.Button(janela, text="Empréstimos Vencidos", width=20,
-              command=lambda: view(listar_emprestimos_vencidos, "Empréstimos Vencidos")).pack(pady=5)
-
-    def view(func, title):
-        v = tk.Toplevel(janela); v.title(title)
-        for reg in func():
-            info = " - ".join(f"{k}: {reg[k]}" for k in reg)
-            tk.Label(v, text=info).pack(anchor='w')
-
-    tk.Button(janela, text="Adicionar Empréstimo", command=adicionar).pack(pady=10)
-    carregar()
+    tk.Button(form, text="← Voltar", command=voltar, bg=COR_BOTAO,
+              fg="white", relief="flat").pack(pady=5)
