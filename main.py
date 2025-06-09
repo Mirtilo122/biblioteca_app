@@ -1,6 +1,6 @@
 from db import execute_script
 """ from interface import menu_principal """
-from pages.menu_page import menu_principal
+from pages.menu_page import menu_principal, iniciar_aplicacao
 
 def setup_database():
     print("Iniciando configuração dos scripts do banco de dados...")
@@ -22,4 +22,4 @@ if __name__ == '__main__':
     print("Configurando banco de dados...")
     setup_database()
     print("Banco configurado! Iniciando a aplicação...\n")
-    menu_principal()
+    iniciar_aplicacao()
