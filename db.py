@@ -1,8 +1,10 @@
 import mysql.connector
+import pymysql
 
 def get_connection():
     print("Iniciando conexão com o banco de dados")
-    try:
+
+    """ try:
         conn = mysql.connector.connect(
             host='localhost',
             user='root',
@@ -13,7 +15,21 @@ def get_connection():
         return conn
     except mysql.connector.Error as e:
         print(f"Erro ao conectar com o banco de dados: {e}")
+        raise """
+
+    try:
+        conn = pymysql.connect(
+            host='localhost',
+            user='root',
+            password='',
+            database='bibliotecadb'
+        )
+        print("Conexão realizada com sucesso.")
+        return conn
+    except pymysql.MySQLError as e:
+        print(f"Erro ao conectar com o banco de dados: {e}")
         raise
+
 
 def execute_script(script_path):
     print("Iniciando execução")
