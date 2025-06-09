@@ -15,6 +15,5 @@ def menu_principal():
               command=lambda: funcionarios_page(root)).pack(pady=10)
     tk.Button(root, text="Empréstimos", width=20, height=2,
               command=lambda: emprestimos_page(root)).pack(pady=10)
-    # mantenha seus botões de registrar empréstimo e devolução aqui
     root.mainloop()
  
