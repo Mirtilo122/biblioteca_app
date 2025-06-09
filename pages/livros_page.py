@@ -62,9 +62,13 @@ def livros_page(root):
     botoes_topo = tk.Frame(container, bg=COR_BG)
     botoes_topo.pack(pady=(0, 20), fill="x")
 
+    def voltar_inicio():
+        from pages.menu_page import menu_principal
+        menu_principal(root)
+
     tk.Button(botoes_topo, text="← Voltar ao Início", font=FONTE,
           bg=COR_BOTAO, fg="white", padx=10, pady=5, bd=0,
-          relief="flat", command=lambda: menu_principal(root)).pack(side="left")
+          relief="flat", command=voltar_inicio).pack(side="left")
 
     tk.Button(botoes_topo, text="+ Adicionar Novo Livro", font=FONTE,
               bg=COR_BOTAO, fg="white", padx=15, pady=8, bd=0,

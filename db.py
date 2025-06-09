@@ -6,7 +6,7 @@ def get_connection():
         conn = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='',
+            password='123123',
             database='bibliotecadb'
         )
         print("Conexão realizada com sucesso.")
