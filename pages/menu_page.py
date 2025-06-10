@@ -1,18 +1,22 @@
-from db import execute_script
 import tkinter as tk
 from tkinter import ttk
-
 from pages.livros_page import livros_page
 from pages.usuarios_page import usuarios_page
 from pages.funcionarios_page import funcionarios_page
 from pages.emprestimos_page import emprestimos_page
 
 def abrir_pagina(root, pagina_func):
+    """
+    Abre uma página específica na janela principal, destruindo os widgets anteriores.
+    """
     for widget in root.winfo_children():
         widget.destroy()
     pagina_func(root)
 
 def abrir_em_nova_janela(pagina_func):
+    """
+    Abre uma página em uma nova janela em modo tela cheia.
+    """
     nova_janela = tk.Toplevel()
     nova_janela.attributes('-fullscreen', True)
     nova_janela.configure(bg="#f5f7fa")
@@ -20,6 +24,9 @@ def abrir_em_nova_janela(pagina_func):
     nova_janela.bind('<Escape>', lambda e: nova_janela.destroy())
 
 def menu_principal(root):
+    """
+    Cria o menu principal com botões para acessar as páginas de gerenciamento.
+    """
     for widget in root.winfo_children():
         widget.destroy()
     root.title("Sistema da Biblioteca")
@@ -68,8 +75,10 @@ def menu_principal(root):
         btn.bind("<Button-1>", lambda e, f=func: abrir_pagina(root, f))
         btn.bind("<Button-3>", lambda e, f=func: abrir_em_nova_janela(f))
 
-
 def iniciar_aplicacao():
+    """
+    Inicia a aplicação criando a janela principal.
+    """
     root = tk.Tk()
     root.bind('<Escape>', lambda e: root.destroy())
     menu_principal(root)
