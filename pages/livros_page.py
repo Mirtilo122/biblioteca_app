@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from PIL import Image, ImageTk
-from crud import listar_livros, obter_livro, inserir_livro, atualizar_livro, deletar_livro
+from crud import listar_livros, obter_livro, inserir_livro, atualizar_livro, deletar_livro, listar_emprestimos
 
 FONTE = ("Segoe UI", 10)
 COR_BG = "#f5f7fa"
@@ -28,36 +28,6 @@ def livros_page(root):
     tk.Label(container, text="Biblioteca Virtual", font=("Segoe UI", 20, "bold"),
              bg=COR_BG, fg=COR_HEADER).pack(pady=(0, 20))
 
-    # Botão Adicionar
-    tk.Button(container, text="+ Adicionar Novo Livro", font=FONTE,
-              bg=COR_BOTAO, fg="white", padx=15, pady=8, bd=0,
-              relief="flat", command=lambda: mostrar_formulario_livro(root, container)
-              ).pack(pady=(0, 20))
-
-    # Área de rolagem
-    canvas = tk.Canvas(container, bg=COR_BG, highlightthickness=0)
-    scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
-    scroll_frame = tk.Frame(canvas, bg=COR_BG)
-
-    scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-    canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-
-    canvas.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
-
-def livros_page(root):
-    root.title("Biblioteca Virtual")
-    for w in root.winfo_children():
-        w.destroy()
-
-    container = tk.Frame(root, bg=COR_BG)
-    container.pack(fill="both", expand=True, padx=20, pady=20)
-
-    # Título
-    tk.Label(container, text="Biblioteca Virtual", font=("Segoe UI", 20, "bold"),
-             bg=COR_BG, fg=COR_HEADER).pack(pady=(0, 20))
-
     # Botões superiores
     botoes_topo = tk.Frame(container, bg=COR_BG)
     botoes_topo.pack(pady=(0, 20), fill="x")
@@ -67,13 +37,12 @@ def livros_page(root):
         menu_principal(root)
 
     tk.Button(botoes_topo, text="← Voltar ao Início", font=FONTE,
-          bg=COR_BOTAO, fg="white", padx=10, pady=5, bd=0,
-          relief="flat", command=voltar_inicio).pack(side="left")
+              bg=COR_BOTAO, fg="white", padx=10, pady=5, bd=0,
+              relief="flat", command=voltar_inicio).pack(side="left")
 
     tk.Button(botoes_topo, text="+ Adicionar Novo Livro", font=FONTE,
               bg=COR_BOTAO, fg="white", padx=15, pady=8, bd=0,
-              relief="flat", command=lambda: mostrar_formulario_livro(root, container)
-              ).pack(side="right")
+              relief="flat", command=lambda: mostrar_formulario_livro(root, container)).pack(side="right")
 
     # Área de rolagem
     canvas = tk.Canvas(container, bg=COR_BG, highlightthickness=0)
@@ -111,13 +80,41 @@ def livros_page(root):
             botoes_frame = tk.Frame(card, bg=COR_CARD)
             botoes_frame.pack(side="right")
 
-            tk.Button(botoes_frame, text="Ver", bg=COR_VIEW, fg="white", font=FONTE, relief="flat",
-                      command=lambda l=livro: ver_livro(l)).pack(side="left", padx=5)
-            tk.Button(botoes_frame, text="Editar", bg=COR_EDIT, fg="white", font=FONTE, relief="flat",
-                      command=lambda l=livro: mostrar_formulario_livro(root, container, livro)).pack(side="left", padx=5)
+            def on_enter(e, btn, hover_color):
+                btn['background'] = hover_color
+
+            def on_leave(e, btn, original_color):
+                btn['background'] = original_color
+
+            btn_ver = tk.Button(botoes_frame, text="Ver", bg=COR_VIEW, fg="white", font=FONTE, relief="flat",
+                                command=lambda l=livro: ver_livro(l))
+            btn_ver.pack(side="left", padx=5)
+            btn_ver.bind("<Enter>", lambda e: on_enter(e, btn_ver, COR_VIEW_HOVER))
+            btn_ver.bind("<Leave>", lambda e: on_leave(e, btn_ver, COR_VIEW))
+
+            btn_editar = tk.Button(botoes_frame, text="Editar", bg=COR_EDIT, fg="white", font=FONTE, relief="flat",
+                                   command=lambda l=livro: mostrar_formulario_livro(root, container, l))
+            btn_editar.pack(side="left", padx=5)
+            btn_editar.bind("<Enter>", lambda e: on_enter(e, btn_editar, COR_EDIT_HOVER))
+            btn_editar.bind("<Leave>", lambda e: on_leave(e, btn_editar, COR_EDIT))
+
+            btn_excluir = tk.Button(botoes_frame, text="Excluir", bg="#b00020", fg="white", font=FONTE, relief="flat",
+                                    command=lambda l=livro: confirmar_exclusao(l))
+            btn_excluir.pack(side="left", padx=5)
+            btn_excluir.bind("<Enter>", lambda e: on_enter(e, btn_excluir, "#990000"))
+            btn_excluir.bind("<Leave>", lambda e: on_leave(e, btn_excluir, "#b00020"))
+
+    def confirmar_exclusao(livro):
+        emprestimos = listar_emprestimos()
+        if any(e["IDLivro"] == livro["ID"] and e["Status"] != "Devolvido" for e in emprestimos):
+            messagebox.showerror("Erro", "Não é possível excluir o livro, pois ele está emprestado.")
+            return
+        if messagebox.askyesno("Confirmação", "Deseja excluir este livro?"):
+            deletar_livro(livro["ID"])
+            messagebox.showinfo("Removido", "Livro excluído com sucesso.")
+            render_livros()
 
     render_livros()
-
 
 def ver_livro(livro):
     info = "\n".join([f"{k}: {v}" for k, v in livro.items()])
@@ -153,7 +150,8 @@ def mostrar_formulario_livro(root, container, livro=None):
             entradas[campo] = var
         else:
             entry = tk.Entry(form_frame, font=FONTE)
-            if livro: entry.insert(0, livro[campo])
+            if livro:
+                entry.insert(0, livro[campo])
             entry.pack(fill="x")
             entradas[campo] = entry
 
@@ -172,15 +170,33 @@ def mostrar_formulario_livro(root, container, livro=None):
         except Exception as e:
             messagebox.showerror("Erro", str(e))
 
-    tk.Button(form_frame, text="Salvar", bg=COR_VIEW, fg="white", font=FONTE, relief="flat", command=salvar).pack(pady=10)
+    def on_enter(e, btn, hover_color):
+        btn['background'] = hover_color
+
+    def on_leave(e, btn, original_color):
+        btn['background'] = original_color
+
+    btn_salvar = tk.Button(form_frame, text="Salvar", bg=COR_VIEW, fg="white", font=FONTE, relief="flat", command=salvar)
+    btn_salvar.pack(pady=10)
+    btn_salvar.bind("<Enter>", lambda e: on_enter(e, btn_salvar, COR_VIEW_HOVER))
+    btn_salvar.bind("<Leave>", lambda e: on_leave(e, btn_salvar, COR_VIEW))
+
     if livro:
         def excluir():
+            emprestimos = listar_emprestimos()
+            if any(e["IDLivro"] == livro["ID"] and e["Status"] != "Devolvido" for e in emprestimos):
+                messagebox.showerror("Erro", "Não é possível excluir o livro, pois ele está emprestado.")
+                return
             if messagebox.askyesno("Confirmação", "Deseja excluir este livro?"):
                 deletar_livro(livro["ID"])
                 messagebox.showinfo("Removido", "Livro excluído com sucesso.")
                 livros_page(root)
-        tk.Button(form_frame, text="Excluir", bg="#b00020", fg="white", font=FONTE, relief="flat", command=excluir).pack()
+        btn_excluir = tk.Button(form_frame, text="Excluir", bg="#b00020", fg="white", font=FONTE, relief="flat", command=excluir)
+        btn_excluir.pack(pady=5)
+        btn_excluir.bind("<Enter>", lambda e: on_enter(e, btn_excluir, "#990000"))
+        btn_excluir.bind("<Leave>", lambda e: on_leave(e, btn_excluir, "#b00020"))
 
-    tk.Button(form_frame, text="← Voltar", command=voltar, bg=COR_BOTAO, fg="white", relief="flat").pack(pady=5)
-
-
+    btn_voltar = tk.Button(form_frame, text="← Voltar", command=voltar, bg=COR_BOTAO, fg="white", relief="flat")
+    btn_voltar.pack(pady=5)
+    btn_voltar.bind("<Enter>", lambda e: on_enter(e, btn_voltar, COR_BOTAO_HOVER))
+    btn_voltar.bind("<Leave>", lambda e: on_leave(e, btn_voltar, COR_BOTAO))
