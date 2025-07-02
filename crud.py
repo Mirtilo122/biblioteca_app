@@ -13,7 +13,7 @@ def listar_livros():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT * FROM Livros")
+        cursor.execute("SELECT * FROM Livros") 
         return cursor.fetchall()
     finally:
         cursor.close()
